@@ -1,5 +1,11 @@
 package com.example.authorization_server_in_memory.configuration;
 
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -7,19 +13,11 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -38,9 +36,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
 
-/*@Configuration*/
-@EnableWebSecurity
-public class AuthorizationServerConfigSSYOUT {
+@Configuration
+public class AuthorizationServerConfig {
 
       @Bean
       @Order(1)
@@ -48,7 +45,8 @@ public class AuthorizationServerConfigSSYOUT {
             throws Exception {
             OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
             http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                  .oidc(Customizer.withDefaults());	// Enable OpenID Connect 1.0
+                  // Enable OpenID Connect 1.0
+                  .oidc(Customizer.withDefaults());
             http
                   // Redirect to the login page when not authenticated from the
                   // authorization endpoint
@@ -62,7 +60,7 @@ public class AuthorizationServerConfigSSYOUT {
             return http.build();
       }
 
-/*      @Bean
+      @Bean
       @Order(2)
       public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
             throws Exception {
@@ -75,30 +73,30 @@ public class AuthorizationServerConfigSSYOUT {
                   .formLogin(Customizer.withDefaults());
 
             return http.build();
-      }*/
+      }
 
       @Bean
       public UserDetailsService userDetailsService() {
-            UserDetails user = User.withDefaultPasswordEncoder()
-                  .username("user1")
+            UserDetails userDetails = User.withDefaultPasswordEncoder()
+                  .username("user")
                   .password("password")
                   .roles("USER")
                   .build();
-            return new InMemoryUserDetailsManager(user);
+
+            return new InMemoryUserDetailsManager(userDetails);
       }
 
       @Bean
       public RegisteredClientRepository registeredClientRepository() {
             RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
                   .clientId("messaging-client")
-/*                  .clientSecret("secret")*/
                   .clientSecret("{noop}secret")
                   .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-/*                  .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)*/
+                  .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                   .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                   .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                  .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
-                  .redirectUri("http://127.0.0.1:8080/authorized")
+                  .redirectUri("http://127.0.0.1:9000/login/oauth2/code/messaging-client-oidc")
+                  .redirectUri("http://127.0.0.1:9000/authorized")
                   .scope(OidcScopes.OPENID)
                   .scope(OidcScopes.PROFILE)
                   .scope("message.read")
