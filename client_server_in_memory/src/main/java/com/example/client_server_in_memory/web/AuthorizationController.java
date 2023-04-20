@@ -20,7 +20,6 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 @Controller
 public class AuthorizationController {
 
-
       private final WebClient webClient;
 
       private final String messagesBaseUri;
@@ -35,7 +34,7 @@ public class AuthorizationController {
       public String authorizationCodeGrant(Model model,
                                            @RegisteredOAuth2AuthorizedClient("messaging-client-authorization-code")
                                                  OAuth2AuthorizedClient authorizedClient) {
-
+            System.out.println("AuthorizationCode controller");
             String[] messages = this.webClient
                   .get()
                   .uri(this.messagesBaseUri)
@@ -64,8 +63,13 @@ public class AuthorizationController {
             return "index";
       }
 
+      /**
+       * Method for clientCredential
+       * http://127.0.0.1:8090/messages - resource server url
+       */
       @GetMapping(value = "/authorize", params = "grant_type=client_credentials")
       public String clientCredentialsGrant(Model model) {
+            System.out.println("Client credentials controller");
             System.out.println("before");
             String[] messages = this.webClient
                   .get()
